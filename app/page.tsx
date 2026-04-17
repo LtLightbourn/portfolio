@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/accordion";
 
 // Replace with your Calendly link once created.
-const CALENDLY_URL = "https://calendly.com/ltlightbourn/30min";
+const CALENDLY_URL = "https://calendly.com/ltlightbourn/discovery-call";
 
 const SHIPPED_PRODUCTS = [
   {
