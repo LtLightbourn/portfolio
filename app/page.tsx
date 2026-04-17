@@ -1,5 +1,3 @@
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -97,11 +95,14 @@ export default function Home() {
           <span className="font-mono text-sm tracking-tight text-zinc-400">
             lawrence<span className="text-emerald-400">.</span>lightbourn
           </span>
-          <Button asChild size="sm" className="rounded-full bg-emerald-400 text-zinc-950 hover:bg-emerald-300">
-            <a href={CALENDLY_URL} target="_blank" rel="noopener noreferrer">
-              Book a call
-            </a>
-          </Button>
+          <a
+            href={CALENDLY_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex h-9 items-center justify-center rounded-full bg-emerald-400 px-4 text-sm font-medium text-zinc-950 transition-colors hover:bg-emerald-300"
+          >
+            Book a call
+          </a>
         </div>
       </header>
 
@@ -123,19 +124,20 @@ export default function Home() {
             Deployed and live, not a prototype.
           </p>
           <div className="mt-10 flex flex-wrap items-center gap-4">
-            <Button asChild size="lg" className="rounded-full bg-emerald-400 text-zinc-950 hover:bg-emerald-300">
-              <a href={CALENDLY_URL} target="_blank" rel="noopener noreferrer">
-                Book a 20-min call
-              </a>
-            </Button>
-            <Button
-              asChild
-              size="lg"
-              variant="ghost"
-              className="rounded-full text-zinc-300 hover:bg-zinc-900 hover:text-zinc-100"
+            <a
+              href={CALENDLY_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex h-12 items-center justify-center rounded-full bg-emerald-400 px-6 text-base font-medium text-zinc-950 transition-colors hover:bg-emerald-300"
             >
-              <a href="#offer">See the offer →</a>
-            </Button>
+              Book a 20-min call
+            </a>
+            <a
+              href="#offer"
+              className="inline-flex h-12 items-center justify-center rounded-full px-6 text-base font-medium text-zinc-300 transition-colors hover:bg-zinc-900 hover:text-zinc-100"
+            >
+              See the offer →
+            </a>
           </div>
         </section>
 
@@ -281,15 +283,14 @@ export default function Home() {
               </div>
 
               <div className="mt-10">
-                <Button
-                  asChild
-                  size="lg"
-                  className="rounded-full bg-emerald-400 text-zinc-950 hover:bg-emerald-300"
+                <a
+                  href={CALENDLY_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex h-12 items-center justify-center rounded-full bg-emerald-400 px-6 text-base font-medium text-zinc-950 transition-colors hover:bg-emerald-300"
                 >
-                  <a href={CALENDLY_URL} target="_blank" rel="noopener noreferrer">
-                    Book a discovery call
-                  </a>
-                </Button>
+                  Book a discovery call
+                </a>
               </div>
             </CardContent>
           </Card>
@@ -408,7 +409,7 @@ export default function Home() {
           <h2 className="mt-2 text-3xl font-semibold tracking-tight md:text-4xl">
             Common questions
           </h2>
-          <Accordion type="single" collapsible className="mt-10 w-full">
+          <Accordion className="mt-10 w-full">
             {FAQ.map((item, i) => (
               <AccordionItem
                 key={i}
@@ -438,19 +439,14 @@ export default function Home() {
                 fit, and you&apos;ll walk away with a go/no-go in under a week.
               </p>
               <div className="mt-8">
-                <Button
-                  asChild
-                  size="lg"
-                  className="rounded-full bg-emerald-400 text-zinc-950 hover:bg-emerald-300"
+                <a
+                  href={CALENDLY_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex h-12 items-center justify-center rounded-full bg-emerald-400 px-6 text-base font-medium text-zinc-950 transition-colors hover:bg-emerald-300"
                 >
-                  <a
-                    href={CALENDLY_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Book a call →
-                  </a>
-                </Button>
+                  Book a call →
+                </a>
               </div>
             </CardContent>
           </Card>
