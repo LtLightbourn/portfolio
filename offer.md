@@ -1,4 +1,4 @@
-# Portfolio Copy — Lawrence Lightbourn
+# Portfolio Copy — LT Lightbourn
 
 Source-of-truth copy for the portfolio site. Edit here first, then sync to
 `app/page.tsx`. Keep this file in the repo so future edits stay consistent.
@@ -85,7 +85,7 @@ Anthropic Claude API · Vercel
 
 ## ABOUT
 
-I'm Lawrence Lightbourn. I'm the Integrator at Social Club Consulting and
+I'm LT Lightbourn. I'm the Integrator at Social Club Consulting and
 I've shipped four SaaS products in the last 18 months across podcast
 content, gaming, field service, and B2B GTM.
 
