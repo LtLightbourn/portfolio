@@ -504,8 +504,17 @@ export default function Home() {
 
           {/* Add-ons strip */}
           <Reveal delay={320}>
-            <div className="mt-20 grid grid-cols-1 gap-4 md:grid-cols-2">
+            <p className="mt-20 mb-6 font-mono text-[10px] uppercase tracking-[0.25em] text-[#5a564f]">
+              — Smaller engagements
+            </p>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               {[
+                {
+                  title: "AI Landing Page",
+                  desc: "Single-page site with one AI-powered feature. Perfect for testing an idea before committing to the full MVP.",
+                  price: "$1,500",
+                  time: "5 days",
+                },
                 {
                   title: "AI feature retrofit",
                   desc: "Add a Claude-powered feature to your existing app.",
