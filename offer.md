@@ -11,7 +11,7 @@ Source-of-truth copy for the portfolio site. Edit here first, then sync to
 
 **Subhead:** Next.js, Supabase, Stripe, Claude API. Deployed and live.
 
-**Primary CTA:** Book a 20-min call
+**Primary CTA:** Book a 15-min call
 
 ---
 
@@ -124,7 +124,7 @@ next developer can take over.
 ## CTA BLOCK (FOOTER)
 
 **Ready to ship?**
-Book a 20-min discovery call. We'll talk scope, confirm fit, and you'll
+Book a 15-min discovery call. We'll talk scope, confirm fit, and you'll
 walk away with a go/no-go in under a week.
 
 [Book a call]

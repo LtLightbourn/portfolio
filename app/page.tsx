@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/accordion";
 
 // Replace with your Calendly link once created.
-const CALENDLY_URL = "https://calendly.com/your-handle/discovery-call";
+const CALENDLY_URL = "https://calendly.com/ltlightbourn/30min";
 
 const SHIPPED_PRODUCTS = [
   {
@@ -201,7 +201,7 @@ export default function Home() {
                 rel="noopener noreferrer"
                 className="magnetic group inline-flex h-14 items-center gap-3 rounded-full bg-[#c5ff3e] px-7 text-sm font-semibold text-[#0a0a0a] transition-colors hover:bg-white"
               >
-                Book a 20-min call
+                Book a 15-min call
                 <span className="transition-transform group-hover:translate-x-1">
                   →
                 </span>
@@ -752,7 +752,7 @@ export default function Home() {
               </span>
             </h2>
             <p className="mx-auto mt-10 max-w-xl text-lg leading-relaxed text-[#a8a298]">
-              Book a 20-min discovery call. We&apos;ll talk scope, confirm
+              Book a 15-min discovery call. We&apos;ll talk scope, confirm
               fit, and you&apos;ll walk away with a go/no-go in under a week.
             </p>
             <div className="mt-12">
