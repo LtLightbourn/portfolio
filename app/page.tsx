@@ -6,6 +6,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import dynamic from 'next/dynamic';
+const Spline = dynamic(() => import('@splinetool/react-spline'), { ssr: false });
 
 // Replace with your Calendly link once created.
 const CALENDLY_URL = "https://calendly.com/ltlightbourn/discovery-call";
@@ -30,6 +32,16 @@ const SHIPPED_PRODUCTS = [
     urlLabel: "decksmith.gg",
     year: "2025",
     stack: ["Next.js 15", "Supabase", "Tailwind", "Claude API"],
+  },
+  {
+    index: "03",
+    name: "CortaPro",
+    tagline:
+      "The first bilingual profitability SaaS for lawn care operators. AI estimates, GPS crew tracking, per-property profit calculation. Spanish-first.",
+    url: "https://cortapro.com",
+    urlLabel: "cortapro.com",
+    year: "2026",
+    stack: ["Next.js 15", "Supabase", "Stripe", "Claude API"],
   },
 ];
 
@@ -153,7 +165,10 @@ export default function Home() {
         </div>
         {/* Cursor-tracking spotlight */}
         <MouseSpotlight />
-
+{/* Spline Robot */}
+<div className="absolute inset-0 z-0">
+  <Spline scene="https://prod.spline.design/E74YaxYBe2pJTDbH/scene.splinecode" />
+</div>
         <div className="relative z-10 mx-auto w-full max-w-[1400px]">
           {/* Meta rail */}
           <div className="mb-12 flex flex-wrap items-center gap-x-8 gap-y-3 font-mono text-[11px] uppercase tracking-[0.2em] text-[#5a564f]">
@@ -271,7 +286,7 @@ export default function Home() {
                 </h2>
               </div>
               <p className="hidden font-mono text-[10px] uppercase tracking-[0.25em] text-[#5a564f] md:block">
-                02 shipped<br />02 stealth
+                03 shipped<br />01 stealth
               </p>
             </div>
           </Reveal>

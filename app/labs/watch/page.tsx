@@ -1,12 +1,6 @@
-import dynamic from "next/dynamic";
 import Link from "next/link";
 import type { Metadata } from "next";
-
-// Three.js needs `window` — never render on the server.
-const WatchViewer = dynamic(
-  () => import("@/components/watch-viewer").then((m) => m.WatchViewer),
-  { ssr: false },
-);
+import { WatchViewerLazy } from "@/components/watch-viewer-lazy";
 
 export const metadata: Metadata = {
   title: "№ 001 — Movement · Labs · LT Lightbourn",
@@ -49,8 +43,11 @@ export default function WatchLabPage() {
 
       {/* ─── Viewer stage: fills the viewport ─── */}
       <section className="relative h-[100svh] w-full">
-        <div className="absolute inset-0">
-          <WatchViewer />
+        <div
+          className="absolute inset-0"
+          style={{ width: "100%", height: "100%" }}
+        >
+          <WatchViewerLazy />
         </div>
 
         {/* Overlay: editorial title, bottom-left */}

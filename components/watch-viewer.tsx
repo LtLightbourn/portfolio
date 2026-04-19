@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useMemo, useRef } from "react";
+import { Suspense, useEffect, useMemo, useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import {
   OrbitControls,
@@ -96,7 +96,11 @@ function useWatchMaterials() {
 }
 
 /* ──────────────────────────────────────────────────────────
-   Individual gear — rotates on its own axis at its own speed
+   Individual gear — rotates on its own axis at its own speed.
+   The gear shape is drawn in XY and extruded along +Z, so we
+   rotate it -π/2 around X to make it lie flat on a horizontal
+   plate (Y-up world). Rotation animation is then around the
+   LOCAL z-axis (= world y-axis after the flat rotation).
    ────────────────────────────────────────────────────────── */
 function Gear({
   position,
@@ -115,7 +119,7 @@ function Gear({
   speed: number;
   material: THREE.Material;
 }) {
-  const ref = useRef<THREE.Mesh>(null);
+  const innerRef = useRef<THREE.Mesh>(null);
   const geom = useMemo(
     () =>
       makeGearGeometry(
@@ -129,18 +133,25 @@ function Gear({
   );
 
   useFrame((_, delta) => {
-    if (ref.current) ref.current.rotation.z += speed * delta;
+    // Rotate around the gear's own axis (local Z, before flat rotation).
+    if (innerRef.current) innerRef.current.rotation.z += speed * delta;
   });
 
+  // Outer group positions the gear in world space; inner mesh handles
+  // the "lay flat" rotation and the spinning animation.
   return (
-    <mesh
-      ref={ref}
-      position={position}
-      geometry={geom}
-      material={material}
-      castShadow
-      receiveShadow
-    />
+    <group position={position}>
+      <mesh
+        ref={innerRef}
+        // +π/2 (not -π/2) so the extrusion rises ABOVE the gear's
+        // anchor point instead of sinking through the base plate.
+        rotation={[Math.PI / 2, 0, 0]}
+        geometry={geom}
+        material={material}
+        castShadow
+        receiveShadow
+      />
+    </group>
   );
 }
 
@@ -155,40 +166,47 @@ function BalanceWheel({
   position: [number, number, number];
   material: THREE.Material;
 }) {
-  const ref = useRef<THREE.Group>(null);
+  const spinRef = useRef<THREE.Group>(null);
   useFrame(({ clock }) => {
-    if (ref.current) {
-      ref.current.rotation.z = Math.sin(clock.getElapsedTime() * 7) * 0.7;
+    // Oscillate around Y (the up axis after flat rotation).
+    if (spinRef.current) {
+      spinRef.current.rotation.y = Math.sin(clock.getElapsedTime() * 7) * 0.7;
     }
   });
 
   return (
-    <group ref={ref} position={position}>
-      {/* Outer ring */}
-      <mesh castShadow receiveShadow material={material}>
-        <torusGeometry args={[0.55, 0.05, 16, 64]} />
-      </mesh>
-      {/* Spokes (3 arms) */}
-      {[0, 1, 2].map((i) => (
+    <group position={position}>
+      <group ref={spinRef}>
+        {/* Outer ring — torus lies flat when rotated -π/2 on X */}
         <mesh
-          key={i}
-          rotation={[0, 0, (i * Math.PI * 2) / 3]}
+          rotation={[-Math.PI / 2, 0, 0]}
           castShadow
+          receiveShadow
           material={material}
         >
-          <boxGeometry args={[0.08, 1.0, 0.04]} />
+          <torusGeometry args={[0.55, 0.05, 16, 64]} />
         </mesh>
-      ))}
-      {/* Center hub */}
-      <mesh castShadow material={material}>
-        <cylinderGeometry args={[0.08, 0.08, 0.1, 32]} />
-        <meshPhysicalMaterial
-          attach="material"
-          color="#999"
-          metalness={1}
-          roughness={0.2}
-        />
-      </mesh>
+        {/* Spokes (3 arms lying in the horizontal plane) */}
+        {[0, 1, 2].map((i) => (
+          <mesh
+            key={i}
+            rotation={[0, (i * Math.PI * 2) / 3, 0]}
+            castShadow
+            material={material}
+          >
+            <boxGeometry args={[1.0, 0.04, 0.08]} />
+          </mesh>
+        ))}
+        {/* Center hub (cylinder's axis is Y = up, already correct) */}
+        <mesh castShadow>
+          <cylinderGeometry args={[0.08, 0.08, 0.14, 32]} />
+          <meshPhysicalMaterial
+            color="#bbb"
+            metalness={1}
+            roughness={0.2}
+          />
+        </mesh>
+      </group>
     </group>
   );
 }
@@ -224,23 +242,25 @@ function Jewel({
 function ProceduralMovement() {
   const mats = useWatchMaterials();
 
+  // World convention: Y is up. Base plate lies flat in the XZ plane.
+  // Every component's vertical ("stacked") coordinate is Y.
   return (
-    <group rotation={[-Math.PI / 2.6, 0, 0]}>
-      {/* Base plate — the main body of the movement */}
-      <mesh receiveShadow castShadow position={[0, 0, -0.1]}>
-        <cylinderGeometry args={[3, 3, 0.15, 64]} />
+    <group>
+      {/* Base plate — horizontal gold disc, 3 units radius */}
+      <mesh receiveShadow castShadow position={[0, 0, 0]}>
+        <cylinderGeometry args={[3, 3, 0.2, 96]} />
         <meshPhysicalMaterial
           color="#b8934a"
           metalness={1}
-          roughness={0.45}
-          clearcoat={0.2}
+          roughness={0.38}
+          clearcoat={0.25}
         />
       </mesh>
 
-      {/* Decorative circular graining on the plate — subtle rings */}
-      {[0.6, 1.2, 1.8, 2.4].map((r) => (
-        <mesh key={r} position={[0, 0, -0.02]}>
-          <torusGeometry args={[r, 0.008, 6, 80]} />
+      {/* Decorative concentric rings on the plate surface (sunburst) */}
+      {[0.6, 1.2, 1.8, 2.4, 2.7].map((r) => (
+        <mesh key={r} position={[0, 0.105, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[r, 0.006, 6, 120]} />
           <meshPhysicalMaterial
             color="#8a6f38"
             metalness={1}
@@ -249,62 +269,89 @@ function ProceduralMovement() {
         </mesh>
       ))}
 
-      {/* Main gears — varied sizes, positions, and rotation speeds.
-          Slower speed = lower-level (drive) gear, faster = higher-level. */}
+      {/* Main gears — each position uses [x, y, z] where y is vertical.
+          Y offsets stack them above the plate at different heights. */}
       <Gear
-        position={[0, 0, 0.2]}
-        teeth={48}
+        position={[0, 0.15, 0]}
+        teeth={60}
         outerRadius={1.1}
         innerRadius={0.15}
-        thickness={0.12}
+        thickness={0.14}
         speed={0.3}
         material={mats.gold}
       />
       <Gear
-        position={[1.4, 0.8, 0.3]}
-        teeth={36}
+        position={[1.4, 0.2, 0.8]}
+        teeth={40}
         outerRadius={0.75}
         innerRadius={0.1}
-        thickness={0.1}
+        thickness={0.12}
         speed={-0.9}
         material={mats.roseGold}
       />
       <Gear
-        position={[-1.3, 0.9, 0.3]}
-        teeth={28}
+        position={[-1.3, 0.22, 0.9]}
+        teeth={32}
         outerRadius={0.6}
         innerRadius={0.1}
-        thickness={0.1}
+        thickness={0.12}
         speed={1.2}
         material={mats.gold}
       />
       <Gear
-        position={[-1.5, -0.9, 0.25]}
-        teeth={22}
+        position={[-1.5, 0.25, -0.9]}
+        teeth={26}
         outerRadius={0.5}
         innerRadius={0.09}
-        thickness={0.1}
+        thickness={0.11}
         speed={-1.6}
         material={mats.roseGold}
       />
       <Gear
-        position={[1.2, -1.1, 0.25]}
-        teeth={20}
+        position={[1.2, 0.28, -1.1]}
+        teeth={22}
         outerRadius={0.45}
         innerRadius={0.08}
-        thickness={0.09}
+        thickness={0.11}
         speed={2.2}
         material={mats.steel}
       />
 
-      {/* Balance wheel — the signature oscillating component */}
-      <group position={[0, -1.8, 0.35]}>
-        <BalanceWheel position={[0, 0, 0]} material={mats.bluedSteel} />
-      </group>
+      {/* Balance wheel — the signature oscillating component, front-center */}
+      <BalanceWheel position={[0, 0.55, -1.8]} material={mats.bluedSteel} />
 
-      {/* Curved bridge — elevated plate spanning across the movement */}
-      <mesh position={[0.8, 0.2, 0.55]} castShadow>
-        <boxGeometry args={[2.4, 0.6, 0.12]} />
+      {/* Hairspring spiral beneath the balance wheel — a thin coiled torus.
+          Builds a subtle blue spiral effect with overlapping rings. */}
+      {[0.15, 0.22, 0.3, 0.38].map((r, i) => (
+        <mesh
+          key={i}
+          position={[0, 0.4 + i * 0.005, -1.8]}
+          rotation={[-Math.PI / 2, 0, 0]}
+        >
+          <torusGeometry args={[r, 0.008, 6, 64]} />
+          <meshPhysicalMaterial
+            color="#3a4a9a"
+            metalness={1}
+            roughness={0.15}
+          />
+        </mesh>
+      ))}
+
+      {/* Curved bridge — elevated plate spanning across the top of the
+          movement, offset slightly forward so main gears peek beneath. */}
+      <mesh position={[0.2, 0.42, 0.85]} castShadow>
+        <boxGeometry args={[2.6, 0.15, 0.7]} />
+        <meshPhysicalMaterial
+          color="#c9a24c"
+          metalness={1}
+          roughness={0.28}
+          clearcoat={0.45}
+        />
+      </mesh>
+
+      {/* Second smaller bridge on the opposite side for asymmetry */}
+      <mesh position={[-0.5, 0.4, -0.4]} castShadow rotation={[0, 0.5, 0]}>
+        <boxGeometry args={[1.4, 0.12, 0.45]} />
         <meshPhysicalMaterial
           color="#c9a24c"
           metalness={1}
@@ -313,34 +360,36 @@ function ProceduralMovement() {
         />
       </mesh>
 
-      {/* Ruby jewel bearings — scattered at gear axis points */}
-      <Jewel position={[0, 0, 0.4]} material={mats.ruby} />
-      <Jewel position={[1.4, 0.8, 0.5]} material={mats.ruby} />
-      <Jewel position={[-1.3, 0.9, 0.5]} material={mats.ruby} />
-      <Jewel position={[-1.5, -0.9, 0.45]} material={mats.ruby} />
-      <Jewel position={[1.2, -1.1, 0.45]} material={mats.ruby} />
-      <Jewel position={[0, -1.8, 0.5]} material={mats.ruby} />
+      {/* Ruby jewel bearings — at each gear axis, plus one under balance wheel */}
+      <Jewel position={[0, 0.5, 0]} material={mats.ruby} />
+      <Jewel position={[1.4, 0.54, 0.8]} material={mats.ruby} />
+      <Jewel position={[-1.3, 0.56, 0.9]} material={mats.ruby} />
+      <Jewel position={[-1.5, 0.52, -0.9]} material={mats.ruby} />
+      <Jewel position={[1.2, 0.5, -1.1]} material={mats.ruby} />
+      <Jewel position={[0, 0.58, -1.8]} material={mats.ruby} />
 
-      {/* Tiny screws at bridge corners */}
-      {[
-        [-0.3, 0.45, 0.65],
-        [1.9, 0.45, 0.65],
-        [-0.3, -0.05, 0.65],
-        [1.9, -0.05, 0.65],
-      ].map((pos, i) => (
-        <group key={i} position={pos as [number, number, number]}>
+      {/* Tiny screws at bridge corners — countersunk with a dark slot */}
+      {(
+        [
+          [-0.9, 0.53, 1.1],
+          [1.3, 0.53, 1.1],
+          [-0.9, 0.53, 0.6],
+          [1.3, 0.53, 0.6],
+        ] as const
+      ).map((pos, i) => (
+        <group key={i} position={pos as unknown as [number, number, number]}>
           <mesh castShadow>
-            <cylinderGeometry args={[0.08, 0.08, 0.06, 12]} />
+            <cylinderGeometry args={[0.09, 0.09, 0.05, 16]} />
             <meshPhysicalMaterial
-              color="#9c9c9c"
+              color="#a5a5a5"
               metalness={1}
-              roughness={0.25}
+              roughness={0.22}
             />
           </mesh>
-          {/* Screw slot */}
-          <mesh position={[0, 0.035, 0]}>
-            <boxGeometry args={[0.12, 0.01, 0.02]} />
-            <meshBasicMaterial color="#1a1a1a" />
+          {/* Screw slot — tiny dark box on top */}
+          <mesh position={[0, 0.028, 0]} rotation={[0, (i % 2) * 0.4, 0]}>
+            <boxGeometry args={[0.13, 0.008, 0.025]} />
+            <meshBasicMaterial color="#111" />
           </mesh>
         </group>
       ))}
@@ -361,6 +410,19 @@ function LoadedModel({ url }: { url: string }) {
    Main exported viewer
    ────────────────────────────────────────────────────────── */
 export function WatchViewer({ modelUrl }: { modelUrl?: string }) {
+  // R3F's ResizeObserver can miss the initial size when mounted via
+  // next/dynamic — the parent measures 0 before layout settles. Firing
+  // a resize event after mount forces R3F to re-measure and resize
+  // the WebGL canvas to its true container dimensions.
+  useEffect(() => {
+    // Fire several times over a ~200ms window to catch the parent once
+    // layout settles (parent sometimes measures 0 at initial mount).
+    const timers = [0, 50, 150, 300].map((ms) =>
+      setTimeout(() => window.dispatchEvent(new Event("resize")), ms),
+    );
+    return () => timers.forEach(clearTimeout);
+  }, []);
+
   return (
     <Canvas
       shadows
@@ -368,11 +430,16 @@ export function WatchViewer({ modelUrl }: { modelUrl?: string }) {
         antialias: true,
         toneMapping: THREE.ACESFilmicToneMapping,
         toneMappingExposure: 1.1,
+        // Needed so external tools (e.g. screenshot / readPixels) can
+        // sample the rendered frame. Small perf cost is negligible here.
+        preserveDrawingBuffer: true,
       }}
       dpr={[1, 2]}
-      className="!absolute inset-0"
+      style={{ width: "100%", height: "100%", display: "block" }}
     >
-      <PerspectiveCamera makeDefault position={[0, 2, 6]} fov={35} />
+      {/* Watchmaker's 3/4 overhead view — high enough to see the layout,
+          angled enough to show depth of bridges and gears */}
+      <PerspectiveCamera makeDefault position={[3, 5, 6]} fov={32} />
 
       <Suspense fallback={null}>
         {modelUrl ? <LoadedModel url={modelUrl} /> : <ProceduralMovement />}
@@ -381,35 +448,37 @@ export function WatchViewer({ modelUrl }: { modelUrl?: string }) {
             "studio" = clean photography-style key/fill/rim lighting. */}
         <Environment preset="studio" background={false} />
 
-        {/* Soft shadow under the object — grounds it in space */}
+        {/* Soft shadow directly beneath the plate — grounds the object */}
         <ContactShadows
-          position={[0, -1.6, 0]}
-          opacity={0.6}
-          scale={10}
-          blur={2.5}
-          far={4}
+          position={[0, -0.11, 0]}
+          opacity={0.7}
+          scale={14}
+          blur={2.6}
+          far={3}
         />
       </Suspense>
 
       {/* Key + rim lights for extra sculpting beyond the HDR */}
       <directionalLight
-        position={[4, 5, 3]}
+        position={[5, 7, 3]}
         intensity={1.4}
         castShadow
         shadow-mapSize={[2048, 2048]}
         shadow-bias={-0.0001}
       />
-      <directionalLight position={[-5, 2, -3]} intensity={0.6} color="#8ec5ff" />
-      <directionalLight position={[0, -3, 5]} intensity={0.3} color="#c5ff3e" />
+      <directionalLight position={[-5, 4, -3]} intensity={0.5} color="#8ec5ff" />
+      <directionalLight position={[0, -2, 5]} intensity={0.25} color="#c5ff3e" />
 
       <OrbitControls
         autoRotate
-        autoRotateSpeed={0.5}
+        autoRotateSpeed={0.6}
         enablePan={false}
-        minDistance={4}
-        maxDistance={12}
-        minPolarAngle={Math.PI * 0.15}
-        maxPolarAngle={Math.PI * 0.75}
+        target={[0, 0.2, 0]}
+        minDistance={5}
+        maxDistance={14}
+        // Keep the camera between "slightly above horizon" and "straight down"
+        minPolarAngle={Math.PI * 0.12}
+        maxPolarAngle={Math.PI * 0.48}
       />
     </Canvas>
   );
