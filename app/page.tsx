@@ -6,8 +6,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import dynamic from 'next/dynamic';
-const Spline = dynamic(() => import('@splinetool/react-spline'), { ssr: false });
+import SplineRobot from '@/components/spline-robot';
 
 // Replace with your Calendly link once created.
 const CALENDLY_URL = "https://calendly.com/ltlightbourn/discovery-call";
@@ -167,7 +166,7 @@ export default function Home() {
         <MouseSpotlight />
 {/* Spline Robot */}
 <div className="absolute inset-0 z-0">
-  <Spline scene="https://prod.spline.design/E74YaxYBe2pJTDbH/scene.splinecode" />
+  <SplineRobot />
 </div>
         <div className="relative z-10 mx-auto w-full max-w-[1400px]">
           {/* Meta rail */}
