@@ -311,3 +311,9 @@
 .marquee-mask {
   mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
 }
+/* Hide Spline watermark */
+#spline-watermark,
+div[class*="watermark"],
+a[href*="spline.design"] {
+  display: none !important;
+}
